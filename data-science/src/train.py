@@ -38,10 +38,10 @@ def main(args):
     test_df = pd.read_csv(Path(args.test_data)/"test.csv")
 
     # Split the data into input(X) and output(y)
-    y_train = train_df['Price']
-    X_train = train_df.drop(columns=['Price'])
-    y_test = test_df['Price']
-    X_test = test_df.drop(columns=['Price'])
+    y_train = train_df['price']
+    X_train = train_df.drop(columns=['price'])
+    y_test = test_df['price']
+    X_test = test_df.drop(columns=['price'])
 
     # Initialize and train a Decision Tree Classifier
     model = RandomForestRegressor(n_estimators=args.n_estimators, max_depth=args.max_depth, random_state=42)
