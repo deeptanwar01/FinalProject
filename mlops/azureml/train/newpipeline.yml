@@ -1,0 +1,80 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: usedcars_pricing_prediction_pipeline
+experiment_name: usedcars-pricing-prediction
+description: Training Pipeline to predict used cars pricing using Decision Tree classifier
+
+inputs:
+  input:
+    type: uri_file
+    path: azureml:used-cars-data@latest
+
+outputs:
+  train_data:
+  test_data:
+  model_info_output_path:
+
+settings:
+  default_datastore: azureml:workspaceblobstore
+  default_compute: azureml:cpu-cluster
+  continue_on_step_failure: false
+
+jobs:
+  prep_data:
+    name: prep_data
+    display_name: prep-data
+    code: ../../../data-science/src
+    command: >-
+      python prep.py 
+      --raw_data ${{inputs.raw_data}} 
+      --train_data ${{outputs.train_data}}
+      --test_data ${{outputs.test_data}}
+    environment: azureml:used-cars-train-env@latest
+    inputs:
+      raw_data: ${{parent.inputs.input}}
+    outputs:
+      train_data: ${{parent.outputs.train_data}}
+      test_data: ${{parent.outputs.test_data}}
+
+  sweep_step:
+    name: sweep_job
+    display_name: sweep-job
+    type: sweep
+    inputs:
+      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
+      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
+    outputs:
+      model_output:
+        type: mlflow_model
+    sampling_algorithm: random
+    trial: ./train.yml  # Refers to a separate command component
+    search_space:
+      n_estimators:
+        type: choice
+        values: [10, 20, 30, 50]
+      max_depth:
+        type: choice  # Specify the type for max_depth
+        values: [10, 20, 30, 50]  # Provide the values for max_depth
+    objective:
+      goal: Minimize
+      primary_metric: MSE
+    limits:
+      max_total_trials: 20
+      max_concurrent_trials: 10
+      timeout: 7200
+
+  register_model:
+    name: register_model
+    display_name: register-model
+    code: ../../../data-science/src
+    command: >-
+      python register.py 
+      --model_name ${{inputs.model_name}} 
+      --model_path ${{inputs.model_path}} 
+      --model_info_output_path ${{outputs.model_info_output_path}}
+    environment: azureml:used-cars-train-env@latest
+    inputs:
+      model_name: "used_cars_price_prediction_model"
+      model_path: ${{parent.jobs.sweep_step.outputs.model_output}}
+    outputs:
+      model_info_output_path: ${{parent.outputs.model_info_output_path}}
