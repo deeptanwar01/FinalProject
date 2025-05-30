@@ -7,7 +7,7 @@ Trains ML model using the training dataset and evaluates using the test dataset.
 import argparse
 from pathlib import Path
 import pandas as pd
-from sklearn.tree import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 import mlflow
 import mlflow.sklearn
