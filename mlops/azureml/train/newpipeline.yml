@@ -51,10 +51,10 @@ jobs:
     search_space:
       n_estimators:
         type: choice
-        values: [70, 80, 90, 100]
+        values: [10, 20, 30, 50]
       max_depth:
         type: choice  # Specify the type for max_depth
-        values: [20, 30, 40, 50]  # Provide the values for max_depth
+        values: [10, 20, 30, 50]  # Provide the values for max_depth
     objective:
       goal: Minimize
       primary_metric: MSE
