@@ -2,7 +2,7 @@ $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
 display_name: usedcars_pricing_prediction_pipeline
 experiment_name: usedcars-pricing-prediction
-description: Training Pipeline to predict used cars pricing using Decision Tree classifier
+description: Training Pipeline to predict used cars pricing using Random Forest Refressor
 
 inputs:
   input:
@@ -51,10 +51,10 @@ jobs:
     search_space:
       n_estimators:
         type: choice
-        values: [10, 20, 30, 50]
+        values: [70, 80, 90, 100]
       max_depth:
         type: choice  # Specify the type for max_depth
-        values: [10, 20, 30, 50]  # Provide the values for max_depth
+        values: [30, 40, 50, None]  # Provide the values for max_depth
     objective:
       goal: Minimize
       primary_metric: MSE
